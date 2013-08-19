@@ -1,7 +1,16 @@
 """Application base class for displaying data about a single object.
 """
 import abc
-import itertools
+
+try:
+    from itertools import compress
+except ImportError:
+    # for py26 compat
+    from itertools import izip
+
+    def compress(data, selectors):
+        return (d for d, s in izip(data, selectors) if s)
+
 import logging
 
 from .display import DisplayCommandBase
@@ -38,7 +47,7 @@ class ShowOne(DisplayCommandBase):
             # Set up argument to compress()
             selector = [(c in columns_to_include)
                         for c in column_names]
-            data = list(itertools.compress(data, selector))
+            data = list(compress(data, selector))
         self.formatter.emit_one(columns_to_include,
                                 data,
                                 self.app.stdout,
