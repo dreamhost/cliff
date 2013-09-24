@@ -17,8 +17,8 @@ except IOError:
 
 install_requires = [
     'PrettyTable>=0.6,<0.8',
-    'pyparsing>=2.0.1',
-    'cmd2>=0.6.7',
+    # 'pyparsing>=2.0.1',
+    # 'cmd2>=0.6.7',
 ]
 
 try:
