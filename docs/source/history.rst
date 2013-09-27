@@ -2,6 +2,10 @@
  Release History
 =================
 
+2.0
+
+- Remove dependencies on upstream packages cmd2 and pyparsing.
+
 1.4.5
 
 - Update the pyparsing dependency to a version that supports both
