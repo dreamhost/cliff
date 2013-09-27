@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 PROJECT = 'cliff'
-VERSION = '1.4.5'
+VERSION = '2.0.0'
 
 from setuptools import setup, find_packages
 
@@ -17,8 +17,6 @@ except IOError:
 
 install_requires = [
     'PrettyTable>=0.6,<0.8',
-    # 'pyparsing>=2.0.1',
-    # 'cmd2>=0.6.7',
 ]
 
 try:
