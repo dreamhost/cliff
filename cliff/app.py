@@ -253,7 +253,10 @@ class App(object):
                                                         self.stdin,
                                                         self.stdout,
                                                         )
-        self.interpreter.cmdloop()
+        try:
+            self.interpreter.cmdloop()
+        except KeyboardInterrupt:
+            pass
         return 0
 
     def run_subcommand(self, argv):
