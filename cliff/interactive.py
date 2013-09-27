@@ -57,23 +57,22 @@ class InteractiveApp(cmd.Cmd):
         line_parts = shlex.split(line)
         self.parent_app.run_subcommand(line_parts)
 
-    def completedefault(self, text, line, begidx, endidx):
-        print 'completedefault', text, line, begidx, endidx
-        # Tab-completion for commands known to the command manager.
-        # Does not handle options on the commands.
-        if not text:
-            completions = sorted(n for n, v in self.command_manager)
-        else:
-            completions = sorted(n for n, v in self.command_manager
-                                 if n.startswith(text)
-                                 )
-        return completions
-
     def help_help(self):
         # Use the command manager to get instructions for "help"
         self.default('help help')
 
+    def _plugin_command_names(self):
+        return sorted(
+            n
+            for n, v in self.command_manager
+            # Ignore the help command, because we have a builtin for
+            # that and we don't want it to show up twice.
+            if n != 'help'
+        )
+
     def do_help(self, arg):
+        """print help for a subcommand
+        """
         if arg:
             # Check if the arg is a builtin command or something
             # coming from the command manager
@@ -96,22 +95,49 @@ class InteractiveApp(cmd.Cmd):
             self.default('help ' + arg)
         else:
             cmd.Cmd.do_help(self, arg)
-            cmd_names = sorted([n for n, v in self.command_manager])
+            cmd_names = self._plugin_command_names()
             self.print_topics(self.app_cmd_header, cmd_names, 15, 80)
         return
 
     def do_EOF(self, line):
+        """exit interactive mode
+        """
         return True
 
+    def completedefault(self, text, line, begidx, endidx):
+        # Tab-completion for commands known to the command manager.
+        # Does not handle options on the commands.
+        completions = self.get_names()
+        if text:
+            completions = [n for n in completions
+                           if n.startswith(text)
+                           ]
+        return completions
+
+    def completenames(self, text, *ignored):
+        """Return a list of candidate names based on the prefix text.
+        """
+        return [
+            name for name in (
+                (n[3:] if n.startswith('do_') else n)
+                for n in self.get_names()
+            )
+            if name.startswith(text)
+        ]
+
     def get_names(self):
-        # Override the base class version to filter out
-        # things that look like they should be hidden
-        # from the user.
-        print 'get_names'
-        return [n
-                for n in cmd.Cmd.get_names(self)
-                if not n.startswith('do__')
-                ]
+        """Return a list of all command names.
+        """
+        # Override the base class version to include names from the
+        # command manager.
+        plugins = self._plugin_command_names()
+        built_ins = [n
+                     for n in cmd.Cmd.get_names(self)
+                     # filter out things that look like they should be
+                     # hidden from the user
+                     if n.startswith('do_') and not n.startswith('do__')
+                     ]
+        return list(sorted(itertools.chain(plugins, built_ins)))
 
     # def precmd(self, statement):
     #     # Pre-process the parsed command in case it looks like one of
